@@ -43,6 +43,8 @@ import org.sufficientlysecure.keychain.daos.ApiAppDao;
 import org.sufficientlysecure.keychain.remote.ui.dialog.RemoteSelectIdKeyActivity.RemoteSelectIdViewModel;
 import org.sufficientlysecure.keychain.service.ImportKeyringParcel;
 import org.sufficientlysecure.keychain.service.SaveKeyringParcel;
+import org.sufficientlysecure.keychain.util.Preferences;
+
 import timber.log.Timber;
 
 
@@ -172,7 +174,8 @@ class RemoteSelectIdentityKeyPresenter {
         view.showLayoutGenerateProgress();
 
         SaveKeyringParcel.Builder builder = SaveKeyringParcel.buildNewKeyringParcel();
-        Constants.addDefaultSubkeys(builder);
+        boolean tiny_key = Preferences.getPreferences(context).getExperimentalUseOffline();
+        Constants.addDefaultSubkeys(builder, tiny_key);
         builder.addUserId(userId.email);
 
         viewModel.getKeyGenerationLiveData(context).setSaveKeyringParcel(builder.build());

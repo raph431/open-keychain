@@ -201,11 +201,9 @@ public final class Constants {
      * Default key configuration: 3072 bit RSA (certify + sign, encrypt)
      */
 
-    public static void addDefaultSubkeys(SaveKeyringParcel.Builder builder) {
+    public static void addDefaultSubkeys(SaveKeyringParcel.Builder builder, boolean tiny_key) {
 
-        // if (Preferences.getPreferences(getApplicationContext()).getExperimentalUseOffline()) {
-        boolean tiny_default_key = true;
-        if (tiny_default_key) {
+        if (tiny_key) {
             builder.addSubkeyAdd(SubkeyAdd.createSubkeyAdd(SaveKeyringParcel.Algorithm.RSA,
                     1024, null, KeyFlags.CERTIFY_OTHER | KeyFlags.SIGN_DATA | KeyFlags.ENCRYPT_COMMS, 0L));
         } else {

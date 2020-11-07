@@ -278,7 +278,7 @@ public class CreateKeyFinalFragment extends Fragment {
 
     }
 
-    private static SaveKeyringParcel createDefaultSaveKeyringParcel(CreateKeyActivity createKeyActivity) {
+    private SaveKeyringParcel createDefaultSaveKeyringParcel(CreateKeyActivity createKeyActivity) {
         SaveKeyringParcel.Builder builder = SaveKeyringParcel.buildNewKeyringParcel();
 
         if (createKeyActivity.mCreateSecurityToken) {
@@ -296,7 +296,8 @@ public class CreateKeyFinalFragment extends Fragment {
             // use empty passphrase
             builder.setNewUnlock(ChangeUnlockParcel.createUnLockParcelForNewKey(new Passphrase()));
         } else {
-            Constants.addDefaultSubkeys(builder);
+            boolean tiny_key = Preferences.getPreferences(getActivity()).getExperimentalUseOffline();
+            Constants.addDefaultSubkeys(builder, tiny_key);
 
             if (createKeyActivity.mPassphrase != null) {
                 builder.setNewUnlock(
