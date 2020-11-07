@@ -24,6 +24,8 @@
         For OI Filemanager it makes no difference, gpg files can't be associated
     -->
 
+    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
+
     <!-- The features are explicitly set to android:required="false" to disable all filtering on Google Play -->
     <uses-feature
         android:name="android.hardware.wifi"

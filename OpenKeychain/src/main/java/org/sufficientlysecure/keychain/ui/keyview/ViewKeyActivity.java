@@ -708,7 +708,7 @@ public class ViewKeyActivity extends BaseSecurityTokenActivity {
 
             RelativeLayout.LayoutParams statusParams = (RelativeLayout.LayoutParams)
                     statusText.getLayoutParams();
-            statusParams.setMargins(FormattingUtils.dpToPx(this, 48), 0, 0, 0);
+            statusParams.setMargins(FormattingUtils.dpToPx(this, 10), 0, 0, 0);
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 statusParams.setMarginEnd(0);
             }

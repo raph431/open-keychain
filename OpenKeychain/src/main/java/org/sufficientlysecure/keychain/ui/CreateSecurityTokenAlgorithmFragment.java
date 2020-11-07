@@ -41,7 +41,7 @@ import java.util.List;
 public class CreateSecurityTokenAlgorithmFragment extends Fragment {
 
     public enum SupportedKeyType {
-        RSA_2048, RSA_3072, RSA_4096, ECC_P256, ECC_P384, ECC_P521
+        RSA_1024, RSA_2048, RSA_3072, RSA_4096, ECC_P256, ECC_P384, ECC_P521
     }
 
     private CreateKeyActivity mCreateKeyActivity;
@@ -92,6 +92,8 @@ public class CreateSecurityTokenAlgorithmFragment extends Fragment {
 
         ArrayList<Choice<SupportedKeyType>> choices = new ArrayList<>();
 
+        choices.add(new Choice<>(SupportedKeyType.RSA_1024, getResources().getString(
+                R.string.rsa_1024), getResources().getString(R.string.rsa_1024_description_html)));
         choices.add(new Choice<>(SupportedKeyType.RSA_2048, getResources().getString(
                 R.string.rsa_2048), getResources().getString(R.string.rsa_2048_description_html)));
         choices.add(new Choice<>(SupportedKeyType.RSA_3072, getResources().getString(

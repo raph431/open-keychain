@@ -23,12 +23,15 @@ import java.net.Proxy;
 
 import android.os.Environment;
 
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.bcpg.sig.KeyFlags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.sufficientlysecure.keychain.securitytoken.ECKeyFormat;
 import org.sufficientlysecure.keychain.securitytoken.KeyFormat;
 import org.sufficientlysecure.keychain.securitytoken.RSAKeyFormat;
 import org.sufficientlysecure.keychain.service.SaveKeyringParcel;
 import org.sufficientlysecure.keychain.service.SaveKeyringParcel.SubkeyAdd;
+import org.sufficientlysecure.keychain.util.Preferences;
 
 
 public final class Constants {
@@ -77,6 +80,9 @@ public final class Constants {
 
     // used by QR Codes (Guardian Project, Monkeysphere compatibility)
     public static final String FINGERPRINT_SCHEME = "openpgp4fpr";
+
+    // used to transfer a key as QR Code
+    public static final String KEY_SCHEME = "openpgp4key";
 
     // used by openpgp-skt
     public static final String SKT_SCHEME = "OPGPSKT";
@@ -154,6 +160,7 @@ public final class Constants {
         public static final String EXPERIMENTAL_USB_ALLOW_UNTESTED = "experimentalUsbAllowUntested";
         public static final String EXPERIMENTAL_SMARTPGP_VERIFY_AUTHORITY = "smartpgp_authorities_pref";
         public static final String EXPERIMENTAL_SMARTPGP_AUTHORITIES = "smartpgp_authorities";
+        public static final String EXPERIMENTAL_USE_OFFLINE = "experimentalUseOffline";
 
         public static final String KEY_SIGNATURES_TABLE_INITIALIZED = "key_signatures_table_initialized";
 
@@ -193,19 +200,41 @@ public final class Constants {
     /**
      * Default key configuration: 3072 bit RSA (certify + sign, encrypt)
      */
+
     public static void addDefaultSubkeys(SaveKeyringParcel.Builder builder) {
-        builder.addSubkeyAdd(SubkeyAdd.createSubkeyAdd(SaveKeyringParcel.Algorithm.RSA,
-                3072, null, KeyFlags.CERTIFY_OTHER | KeyFlags.SIGN_DATA, 0L));
-        builder.addSubkeyAdd(SubkeyAdd.createSubkeyAdd(SaveKeyringParcel.Algorithm.RSA,
-                3072, null, KeyFlags.ENCRYPT_COMMS | KeyFlags.ENCRYPT_STORAGE, 0L));
+
+        // if (Preferences.getPreferences(getApplicationContext()).getExperimentalUseOffline()) {
+        boolean tiny_default_key = true;
+        if (tiny_default_key) {
+            builder.addSubkeyAdd(SubkeyAdd.createSubkeyAdd(SaveKeyringParcel.Algorithm.RSA,
+                    1024, null, KeyFlags.CERTIFY_OTHER | KeyFlags.SIGN_DATA | KeyFlags.ENCRYPT_COMMS, 0L));
+        } else {
+            builder.addSubkeyAdd(SubkeyAdd.createSubkeyAdd(SaveKeyringParcel.Algorithm.RSA,
+                    3072, null, KeyFlags.CERTIFY_OTHER | KeyFlags.SIGN_DATA, 0L));
+            builder.addSubkeyAdd(SubkeyAdd.createSubkeyAdd(SaveKeyringParcel.Algorithm.RSA,
+                    3072, null, KeyFlags.ENCRYPT_COMMS | KeyFlags.ENCRYPT_STORAGE, 0L));
+        }
+
+    /*
+    // I would prefer a secp256k1 key, since it is bitcoin battle tested
+
+    public static void addDefaultSubkeys(SaveKeyringParcel.Builder builder) {
+        builder.addSubkeyAdd(SubkeyAdd.createSubkeyAdd(SaveKeyringParcel.Algorithm.ECDSA,
+                0, SaveKeyringParcel.Curve.NIST_P256, KeyFlags.CERTIFY_OTHER | KeyFlags.SIGN_DATA, 0L));
+        builder.addSubkeyAdd(SubkeyAdd.createSubkeyAdd(SaveKeyringParcel.Algorithm.ECDH,
+                0, SaveKeyringParcel.Curve.NIST_P256, KeyFlags.ENCRYPT_COMMS | KeyFlags.ENCRYPT_STORAGE, 0L));
     }
+    */
+    }
+
 
     /**
      * Default key format for OpenPGP smart cards v2: 2048 bit RSA (sign+certify, decrypt, auth)
      */
+
     private static final int ELEN = 17; //65537
     public static final KeyFormat SECURITY_TOKEN_V2_SIGN = new RSAKeyFormat(2048, ELEN, RSAKeyFormat.RSAAlgorithmFormat.CRT_WITH_MODULUS);
-    public static final KeyFormat SECURITY_TOKEN_V2_DEC = new RSAKeyFormat(2048, ELEN, RSAKeyFormat.RSAAlgorithmFormat.CRT_WITH_MODULUS);
+    public static final KeyFormat SECURITY_TOKEN_V2_DEC  = new RSAKeyFormat(2048, ELEN, RSAKeyFormat.RSAAlgorithmFormat.CRT_WITH_MODULUS);
     public static final KeyFormat SECURITY_TOKEN_V2_AUTH = new RSAKeyFormat(2048, ELEN, RSAKeyFormat.RSAAlgorithmFormat.CRT_WITH_MODULUS);
 
     private static boolean isRunningUnitTest() {

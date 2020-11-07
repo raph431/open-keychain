@@ -32,4 +32,10 @@
         android:key="smartpgp_authorities"
         android:title="@string/label_smartpgp_roots" />
 
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="experimentalUseOffline"
+        android:persistent="true"
+        android:summary="@string/label_offline_summary"
+        android:title="@string/label_offline" />
 </PreferenceScreen>

@@ -80,6 +80,8 @@ public abstract class KeyFormat {
                 forEncryption ? ECKeyFormat.ECAlgorithmFormat.ECDH_WITH_PUBKEY : ECKeyFormat.ECAlgorithmFormat.ECDSA_WITH_PUBKEY;
 
         switch (t) {
+            case RSA_1024:
+                return new RSAKeyFormat(1024, elen, RSAKeyFormat.RSAAlgorithmFormat.CRT_WITH_MODULUS);
             case RSA_2048:
                 return new RSAKeyFormat(2048, elen, RSAKeyFormat.RSAAlgorithmFormat.CRT_WITH_MODULUS);
             case RSA_3072:

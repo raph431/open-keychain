@@ -412,6 +412,10 @@ public class Preferences {
         return mSharedPreferences.getBoolean(Pref.EXPERIMENTAL_SMARTPGP_VERIFY_AUTHORITY, false);
     }
 
+    public boolean getExperimentalUseOffline() {
+        return mSharedPreferences.getBoolean(Constants.Pref.EXPERIMENTAL_USE_OFFLINE, false);
+    }
+
     public void setPrefVersionToCurrentVersion() {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putInt(Pref.PREF_VERSION, Constants.Defaults.PREF_CURRENT_VERSION);

@@ -62,7 +62,7 @@ public class AddSubkeyDialogFragment extends DialogFragment {
     }
 
     public enum SupportedKeyType {
-        RSA_2048, RSA_3072, RSA_4096, ECC_P256, ECC_P521, EDDSA
+        RSA_1024, RSA_2048, RSA_3072, RSA_4096, ECC_P256, ECC_P521, EDDSA
     }
 
     private static final String ARG_WILL_BE_MASTER_KEY = "will_be_master_key";
@@ -150,6 +150,8 @@ public class AddSubkeyDialogFragment extends DialogFragment {
 
         {
             ArrayList<Choice<SupportedKeyType>> choices = new ArrayList<>();
+            choices.add(new Choice<>(SupportedKeyType.RSA_1024, getResources().getString(
+                    R.string.rsa_1024), getResources().getString(R.string.rsa_1024_description_html)));
             choices.add(new Choice<>(SupportedKeyType.RSA_2048, getResources().getString(
                     R.string.rsa_2048), getResources().getString(R.string.rsa_2048_description_html)));
             choices.add(new Choice<>(SupportedKeyType.RSA_3072, getResources().getString(
@@ -242,6 +244,10 @@ public class AddSubkeyDialogFragment extends DialogFragment {
 
                     // set keysize & curve, for RSA & ECC respectively
                     switch (keyType) {
+                        case RSA_1024: {
+                            keySize = 1024;
+                            break;
+                        }
                         case RSA_2048: {
                             keySize = 2048;
                             break;
@@ -266,6 +272,7 @@ public class AddSubkeyDialogFragment extends DialogFragment {
 
                     // set algorithm
                     switch (keyType) {
+                        case RSA_1024:
                         case RSA_2048:
                         case RSA_3072:
                         case RSA_4096: {

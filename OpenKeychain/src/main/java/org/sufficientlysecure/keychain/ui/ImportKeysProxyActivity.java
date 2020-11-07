@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.sufficientlysecure.keychain.Constants;
 import org.sufficientlysecure.keychain.R;
 import org.sufficientlysecure.keychain.keyimport.ParcelableKeyRing;
@@ -84,7 +85,9 @@ public class ImportKeysProxyActivity extends FragmentActivity
         Uri dataUri = intent.getData();
         String scheme = intent.getScheme();
 
-        if (scheme != null && scheme.toLowerCase(Locale.ENGLISH).equals(Constants.FINGERPRINT_SCHEME)) {
+        if (scheme != null
+                && (scheme.toLowerCase(Locale.ENGLISH).equals(Constants.FINGERPRINT_SCHEME)
+        ||          scheme.toLowerCase(Locale.ENGLISH).equals(Constants.KEY_SCHEME))) {
             // Scanning a fingerprint directly with Barcode Scanner, thus we already have scanned
 
             processScannedContent(dataUri);
@@ -166,37 +169,56 @@ public class ImportKeysProxyActivity extends FragmentActivity
             return;
         }
 
-        // example: openpgp4fpr:73EE2314F65FA92EC2390D3A718C070100012282
         if (uri == null || uri.getScheme() == null ||
-                !uri.getScheme().toLowerCase(Locale.ENGLISH).equals(Constants.FINGERPRINT_SCHEME)) {
+                ( !uri.getScheme().toLowerCase(Locale.ENGLISH).equals(Constants.FINGERPRINT_SCHEME)
+               && !uri.getScheme().toLowerCase(Locale.ENGLISH).equals(Constants.KEY_SCHEME))) {
+
             SingletonResult result = new SingletonResult(
                     SingletonResult.RESULT_ERROR, LogType.MSG_WRONG_QR_CODE);
+            result.getLog().add(LogType.MSG_WRONG_QR_CODE,0, uri.toString());
             Intent intent = new Intent();
             intent.putExtra(SingletonResult.EXTRA_RESULT, result);
             returnResult(intent);
             return;
         }
 
-        final String fingerprintHex = uri.getEncodedSchemeSpecificPart().toLowerCase(Locale.ENGLISH);
-        if (!fingerprintHex.matches("[a-fA-F0-9]{40}")) {
-            SingletonResult result = new SingletonResult(
-                    SingletonResult.RESULT_ERROR, LogType.MSG_WRONG_QR_CODE_FP);
-            Intent intent = new Intent();
-            intent.putExtra(SingletonResult.EXTRA_RESULT, result);
-            returnResult(intent);
-            return;
-        }
-        byte[] fingerprint = KeyFormattingUtils.convertFingerprintHexFingerprint(fingerprintHex);
+        // example: openpgp4fpr:73EE2314F65FA92EC2390D3A718C070100012282
+        if (uri.getScheme().toLowerCase(Locale.ENGLISH).equals(Constants.FINGERPRINT_SCHEME)) {
+            final String fingerprintHex = uri.getEncodedSchemeSpecificPart().toLowerCase(Locale.ENGLISH);
+            if (!fingerprintHex.matches("[a-fA-F0-9]{40}")) {
+                SingletonResult result = new SingletonResult(
+                        SingletonResult.RESULT_ERROR, LogType.MSG_WRONG_QR_CODE_FP);
+                Intent intent = new Intent();
+                intent.putExtra(SingletonResult.EXTRA_RESULT, result);
+                returnResult(intent);
+                return;
+            }
+            byte[] fingerprint = KeyFormattingUtils.convertFingerprintHexFingerprint(fingerprintHex);
 
-        if (ACTION_SCAN_WITH_RESULT.equals(action)) {
-            Intent result = new Intent();
-            result.putExtra(EXTRA_FINGERPRINT, fingerprint);
-            setResult(RESULT_OK, result);
-            finish();
-        } else {
-            importKeysFromFingerprint(fingerprint);
-        }
+            if (ACTION_SCAN_WITH_RESULT.equals(action)) {
+                Intent result = new Intent();
+                result.putExtra(EXTRA_FINGERPRINT, fingerprint);
+                setResult(RESULT_OK, result);
+                finish();
+            } else {
+                importKeysFromFingerprint(fingerprint);
+            }
 
+        // example: OPENPGP4KEY:2D2D2D2D2D424547494E2050... (1280 - 1296 hex characters)
+        } else if (uri.getScheme().toLowerCase(Locale.ENGLISH).equals(Constants.KEY_SCHEME)) {
+            final String keyHex = uri.getEncodedSchemeSpecificPart().toLowerCase(Locale.ENGLISH);
+            if (!keyHex.matches("[a-fA-F0-9]{700,1400}")) {
+                SingletonResult result = new SingletonResult(
+                        SingletonResult.RESULT_ERROR, LogType.MSG_WRONG_QR_CODE_FP);
+                Intent intent = new Intent();
+                intent.putExtra(SingletonResult.EXTRA_RESULT, result);
+                returnResult(intent);
+                return;
+            }
+
+            byte[] keyBytes = Hex.decode(keyHex);
+            importKeys(keyBytes);
+        }
     }
 
     public void returnResult(Intent data) {

@@ -187,8 +187,8 @@ public class PgpKeyOperation {
                     log.add(LogType.MSG_CR_ERROR_NO_KEYSIZE, indent);
                     return null;
                 }
-                if (add.getKeySize() < 2048) {
-                    log.add(LogType.MSG_CR_ERROR_KEYSIZE_2048, indent);
+                if (add.getKeySize() < 1024) {
+                    log.add(LogType.MSG_CR_ERROR_KEYSIZE_1024, indent);
                     return null;
                 }
             }

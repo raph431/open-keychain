@@ -150,20 +150,20 @@ public class PgpSecurityConstants {
             Integer bitStrength, String curveOid) {
         switch (algorithm) {
             case PublicKeyAlgorithmTags.RSA_GENERAL: {
-                if (bitStrength < 2048) {
+                if (bitStrength < 1024) {
                     return new InsecureBitStrength(masterKeyId, subKeyId, algorithm, bitStrength);
                 }
                 return null;
             }
             // RSA_ENCRYPT, RSA_SIGN: deprecated in RFC 4880, use RSA_GENERAL with key flags
             case PublicKeyAlgorithmTags.ELGAMAL_ENCRYPT: {
-                if (bitStrength < 2048) {
+                if (bitStrength < 1024) {
                     return new InsecureBitStrength(masterKeyId, subKeyId, algorithm, bitStrength);
                 }
                 return null;
             }
             case PublicKeyAlgorithmTags.DSA: {
-                if (bitStrength < 2048) {
+                if (bitStrength < 1024) {
                     return new InsecureBitStrength(masterKeyId, subKeyId, algorithm, bitStrength);
                 }
                 return null;

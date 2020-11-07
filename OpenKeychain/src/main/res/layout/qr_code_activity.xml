@@ -18,7 +18,7 @@
             android:id="@+id/qr_code_image_layout"
             android:transitionName="qr_code"
             android:layout_gravity="center_vertical"
-            android:layout_margin="32dp"
+            android:layout_margin="0dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clickable="true"

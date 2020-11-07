@@ -294,6 +294,8 @@
     <string name="choice_forever">"forever"</string>
     <string name="choice_select_cert">"Select a Key"</string>
     <string name="filemanager_title_open">"Open…"</string>
+    <string name="rsa_1024">"RSA 1024"</string>
+    <string name="rsa_1024_description_html">"very tiny file size, no longer considered secure"</string>
     <string name="rsa_2048">"RSA 2048"</string>
     <string name="rsa_2048_description_html">"smaller file size, considered secure until 2030"</string>
     <string name="rsa_3072">"RSA 3072"</string>
@@ -539,7 +541,8 @@
     <string name="import_tab_direct">"File/Clipboard"</string>
     <string name="import_tab_qr_code">"QR Code/NFC"</string>
     <string name="import_found_keys">"Found %1$d keys"</string>
-    <string name="import_qr_code_wrong">"QR Code format not supported (format specification: https://github.com/open-keychain/open-keychain/wiki/QR-Codes)!"</string>
+			    <!-- <string name="import_qr_code_wrong">"QR Code format not supported (format specification: https://github.com/open-keychain/open-keychain/wiki/QR-Codes)!"</string> -->
+    <string name="import_qr_code_wrong">"QR Code format not supported '%s'!"</string>
     <string name="import_qr_code_fp">"Fingerprint is malformed or too short!"</string>
     <string name="import_qr_code_too_short_fingerprint">"Fingerprint is too short!"</string>
     <string name="import_qr_code_button">"Scan QR Code"</string>
@@ -1041,6 +1044,7 @@
     <string name="msg_cr_error_no_user_id">"Keyrings must be created with at least one user ID!"</string>
     <string name="msg_cr_error_no_certify">"Master key must have certify flag!"</string>
     <string name="msg_cr_error_null_expiry">"Expiry time cannot be 'same as before' on key creation. This is a programming error, please file a bug report!"</string>
+    <string name="msg_cr_error_keysize_1024">"Key size must be greater or equal 1024!"</string>
     <string name="msg_cr_error_keysize_2048">"Key size must be greater or equal 2048!"</string>
     <string name="msg_cr_error_no_curve">"No key size specified! This is a programming error, please file a bug report!"</string>
     <string name="msg_cr_error_no_keysize">"No elliptic curve specified! This is a programming error, please file a bug report!"</string>
@@ -1850,6 +1854,8 @@
     <string name="button_locate_nfc">"Where is my NFC reader?"</string>
     <string name="label_usb_untested_summary">If enabled, USB Smartcard readers can be used that have not been properly tested.</string>
     <string name="label_usb_untested">Allow untested USB Devices</string>
+    <string name="label_offline_summary">If enabled, instead of just a key fingerprint, you can share your keys directly with a QR code.</string>
+    <string name="label_offline">Use with an offline device</string>
 
     <string name="use_key">Use key: %s</string>
     <string name="use_key_no_name">Use key: <![CDATA[<no name>]]></string>

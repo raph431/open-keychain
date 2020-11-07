@@ -26,8 +26,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.cardview.widget.CardView;
 import android.widget.ImageView;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.sufficientlysecure.keychain.Constants;
 import org.sufficientlysecure.keychain.R;
+import org.sufficientlysecure.keychain.daos.KeyRepository;
 import org.sufficientlysecure.keychain.model.SubKey.UnifiedKeyInfo;
 import org.sufficientlysecure.keychain.ui.base.BaseActivity;
 import org.sufficientlysecure.keychain.ui.keyview.UnifiedKeyInfoViewModel;
@@ -35,17 +37,25 @@ import org.sufficientlysecure.keychain.ui.util.KeyFormattingUtils;
 import org.sufficientlysecure.keychain.ui.util.Notify;
 import org.sufficientlysecure.keychain.ui.util.Notify.Style;
 import org.sufficientlysecure.keychain.ui.util.QrCodeUtils;
+import org.sufficientlysecure.keychain.util.Preferences;
 
+import java.io.IOException;
+import java.util.Locale;
+
+import timber.log.Timber;
 
 public class QrCodeViewActivity extends BaseActivity {
     public static final String EXTRA_MASTER_KEY_ID = "master_key_id";
 
     private ImageView qrCodeImageView;
     private Bitmap qrCode;
+    private boolean allowUseOffline;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        boolean allowUseOffline = Preferences.getPreferences(getApplicationContext()).getExperimentalUseOffline();
 
         setFullScreenDialogClose(v -> ActivityCompat.finishAfterTransition(QrCodeViewActivity.this));
 
@@ -60,11 +70,19 @@ public class QrCodeViewActivity extends BaseActivity {
 
         UnifiedKeyInfoViewModel viewModel = ViewModelProviders.of(this).get(UnifiedKeyInfoViewModel.class);
         viewModel.setMasterKeyId(getIntent().getLongExtra(EXTRA_MASTER_KEY_ID, 0L));
-        viewModel.getUnifiedKeyInfoLiveData(getApplicationContext()).observe(this, this::onLoadUnifiedKeyInfo);
-
+        if (allowUseOffline) {
+            viewModel.getUnifiedKeyInfoLiveData(getApplicationContext()).observe(this, this::onLoadUnifiedFullKey);
+        } else {
+            viewModel.getUnifiedKeyInfoLiveData(getApplicationContext()).observe(this, this::onLoadUnifiedKeyInfo);
+        }
         qrCodeImageView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
             if (qrCode != null) {
-                Bitmap scaled = Bitmap.createScaledBitmap(qrCode, qrCodeImageView.getWidth(), qrCodeImageView.getWidth(), false);
+                Timber.d("onCreate QrCode size: %dx%d", qrCode.getWidth(), qrCode.getHeight());
+                Timber.d("qrCodeImageView width: %d", qrCodeImageView.getWidth());
+                int dstWidth = qrCode.getWidth() * (qrCodeImageView.getWidth() / qrCode.getWidth());
+                int dstHeight = qrCode.getHeight() * (qrCodeImageView.getWidth()/qrCode.getHeight());
+                Timber.d("dstSize: %dx%d", dstWidth, dstHeight);
+                Bitmap scaled = Bitmap.createScaledBitmap(qrCode, dstWidth, dstHeight, false);
                 qrCodeImageView.setImageBitmap(scaled);
             }
         });
@@ -82,6 +100,33 @@ public class QrCodeViewActivity extends BaseActivity {
                 .opaquePart(KeyFormattingUtils.convertFingerprintToHex(unifiedKeyInfo.fingerprint()))
                 .build();
         qrCode = QrCodeUtils.getQRCodeBitmap(uri, 0);
+
+        qrCodeImageView.requestLayout();
+    }
+
+    private void onLoadUnifiedFullKey(UnifiedKeyInfo unifiedFullKey) {
+        if (unifiedFullKey == null) {
+            Notify.create(this, R.string.error_key_not_found, Style.ERROR).show();
+            ActivityCompat.finishAfterTransition(QrCodeViewActivity.this);
+            return;
+        }
+
+        KeyRepository keyRepository = KeyRepository.create(this);
+        String content;
+        try {
+            content = keyRepository.getPublicKeyRingAsArmoredString(unifiedFullKey.master_key_id());
+        } catch (KeyRepository.NotFoundException  | IOException e) {
+            Notify.create(this, R.string.error_key_not_found, Notify.Style.ERROR).show();
+            ActivityCompat.finishAfterTransition(QrCodeViewActivity.this);
+            return;
+        }
+
+        Uri uri = new Uri.Builder()
+                .scheme(Constants.KEY_SCHEME)
+                .opaquePart(Hex.toHexString(content.getBytes()).toLowerCase(Locale.ENGLISH))
+                .build();
+        qrCode = QrCodeUtils.getQRCodeBitmap(uri, 0);
+        Timber.d("onLoadUnifiedFullKey QrCode size: %dx%d", qrCode.getWidth(), qrCode.getHeight());
 
         qrCodeImageView.requestLayout();
     }
